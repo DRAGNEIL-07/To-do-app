@@ -1,33 +1,40 @@
-# 📝 Full-Stack Todo List App
-A beautifully designed and fully functional **Todo List App** built with HTML, CSS, and JavaScript (Frontend) and powered by a lightweight **Node.js Express API** (Backend). Users can create, complete, and delete tasks in real time.
+📝 Priority Scheduler – Full-Stack Todo App
+
+A clean, modern, and fully functional **Todo Scheduler Web App** to help you organize your tasks by **priority**, **due date**, and **completion status**. Built with HTML/CSS/JavaScript (frontend) and Node.js/Express (backend), this app makes tracking your most important tasks effortless.
+
+---
 
 🚀 Features
 
-- ✅ Add new todo tasks
-- ✅ Mark tasks as completed
+- ✅ Add tasks with:
+  - Description
+  - Due date & time
+  - Priority level (High, Medium, Low)
+- ✅ Sort tasks by urgency (date + priority)
+- ✅ Mark tasks as complete/incomplete
 - ✅ Delete tasks
-- ✅ Persistent task state via backend API
-- ✅ Fully responsive 
-- ✅ Built using modular, scalable architecture
+- ✅ All data synced via Express backend API
+- ✅ Fully responsive UI for mobile & desktop
+- ✅ Modular & scalable architecture
 
 ---
 
 🛠️ Technologies Used
 
-Frontend:
+### Frontend
 - HTML5
 - CSS3 (custom modern styles)
 - Vanilla JavaScript (ES6+)
-- Fetch API for async requests
+- Fetch API
 
-### Backend:
+Backend
 - Node.js with Express
 
 ---
 
 🌐 Preview
 
-![App Screenshot](https://github.com/user-attachments/assets/e68b5c1d-8dba-431c-8683-7be85a8a7f63)
+![App Screenshot]<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/01cb2c38-b52f-4544-8af6-fdebda0c0089" />
 
 ---
 
@@ -41,3 +48,18 @@ Frontend:
 
 📜 License
 Free to use and modify.
+
+---
+
+🧪 Project Structure
+priority-scheduler-app/
+├── backend/
+│   ├── index.js
+│   ├── package.json
+│   └── package-lock.json
+│
+├── frontend/
+│   ├── index.html
+│   ├── script.js
+│   └── style.css
+

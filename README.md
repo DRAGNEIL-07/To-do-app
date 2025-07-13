@@ -52,6 +52,8 @@ Free to use and modify.
 ---
 
 🧪 Project Structure
+
+
 priority-scheduler-app/
 ├── backend/
 │   ├── index.js

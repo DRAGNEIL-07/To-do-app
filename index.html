@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo List</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <h1>Todo List</h1>
+  <div class="input-container">
+    <input id="input-todo" type="text" placeholder="Enter a new task..." />
+    <button id="add-todo">+</button>
+  </div>
+  <div class="container"></div>
+
+  <script>
+    const inputTodo = document.getElementById("input-todo");
+    const addTodo = document.getElementById("add-todo");
+    const todoContainer = document.querySelector(".container");
+    const API_URL = "http://localhost:4000/todos";
+
+    window.onload = async () => {
+      const todos = await fetchTodos();
+      todos.forEach(displayTodo);
+    };
+
+    async function fetchTodos() {
+      const res = await fetch(API_URL);
+      return res.json();
+    }
+
+    addTodo.addEventListener("click", async () => {
+      const desc = inputTodo.value.trim();
+      if (desc !== "") {
+        const newTodo = await addTodoToServer(desc);
+        displayTodo(newTodo);
+        inputTodo.value = "";
+      }
+    });
+
+    function displayTodo(todo) {
+      const todoEl = document.createElement("div");
+      todoEl.classList.add("todo");
+      if (todo.completed) todoEl.classList.add("completed");
+
+      const todoText = document.createElement("p");
+      todoText.innerText = todo.desc;
+
+      const todoActions = document.createElement("div");
+      todoActions.classList.add("actions");
+
+      const checkbox = document.createElement("input");
+      checkbox.setAttribute("type", "checkbox");
+      checkbox.checked = todo.completed;
+      checkbox.addEventListener("change", async () => {
+        todo.completed = checkbox.checked;
+        await updateTodo(todo);
+        todoEl.classList.toggle("completed", todo.completed);
+      });
+
+      const delBtn = document.createElement("button");
+      delBtn.innerText = "Delete";
+      delBtn.addEventListener("click", async () => {
+        await deleteTodo(todo.id);
+        todoContainer.removeChild(todoEl);
+      });
+
+      todoActions.appendChild(checkbox);
+      todoActions.appendChild(delBtn);
+
+      todoEl.appendChild(todoText);
+      todoEl.appendChild(todoActions);
+
+      todoContainer.appendChild(todoEl);
+    }
+
+    async function addTodoToServer(desc) {
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ desc, completed: false }),
+      });
+      const data = await res.json();
+      return data[data.length - 1];
+    }
+
+    async function updateTodo(todo) {
+      await fetch(`${API_URL}/${todo.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(todo),
+      });
+    }
+
+    async function deleteTodo(id) {
+      await fetch(`${API_URL}/${id}`, {
+        method: "DELETE",
+      });
+    }
+  </script>
+</body>
+
+</html>

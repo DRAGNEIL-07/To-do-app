@@ -13,17 +13,16 @@ const todos = [
   {
     id: 1,
     desc: "Write Python",
+    dueDate: "2025-07-14T15:00:00",
+    priority: "high",
     completed: false,
   },
   {
     id: 2,
     desc: "Write JavaScript",
+    dueDate: "2025-07-15T09:00:00",
+    priority: "medium",
     completed: true,
-  },
-  {
-    id: 3,
-    desc: "Write SQL",
-    completed: false,
   },
 ];
 
@@ -36,30 +35,37 @@ app.get("/todos", (req, res) => {
 });
 
 app.get("/todos/:id", (req, res) => {
-  let todo = todos.filter((todo) => todo.id == req.params.id);
-  res.json(todo);
+  const todo = todos.find((todo) => todo.id == req.params.id);
+  if (todo) {
+    res.json(todo);
+  } else {
+    res.status(404).send("Todo not found");
+  }
 });
 
 app.post("/todos", (req, res) => {
-  console.log(req.body);
-  todos.push({ id: uuid.v4(), ...req.body });
-  res.json(todos);
+  const newTodo = { id: uuid.v4(), ...req.body };
+  todos.push(newTodo);
+  res.json(newTodo);
 });
 
 app.delete("/todos/:id", (req, res) => {
-  let index = todos.findIndex((todo) => todo.id == req.params.id);
-  todos.splice(index, 1);
-  res.json(todos);
+  const index = todos.findIndex((todo) => todo.id == req.params.id);
+  if (index !== -1) {
+    todos.splice(index, 1);
+    res.json({ success: true });
+  } else {
+    res.status(404).send("Todo not found");
+  }
 });
 
 app.put("/todos/:id", (req, res) => {
-  let todo = todos.find((todo) => todo.id == req.params.id);
+  const todo = todos.find((todo) => todo.id == req.params.id);
   if (todo) {
-    todo.desc = req.body.desc;
-    todo.completed = req.body.completed;
-    res.json(todos);
+    Object.assign(todo, req.body);
+    res.json(todo);
   } else {
-    res.send("Todo with given id doesn't exist!");
+    res.status(404).send("Todo with given id doesn't exist!");
   }
 });
 

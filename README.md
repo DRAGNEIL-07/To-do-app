@@ -48,20 +48,3 @@ Backend
 
 📜 License
 Free to use and modify.
-
----
-
-🧪 Project Structure
-
-
-priority-scheduler-app/
-├── backend/
-│   ├── index.js
-│   ├── package.json
-│   └── package-lock.json
-│
-├── frontend/
-│   ├── index.html
-│   ├── script.js
-│   └── style.css
-

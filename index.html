@@ -4,101 +4,148 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Todo List</title>
+  <title>Scheduler – Priority Todo</title>
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-  <h1>Todo List</h1>
-  <div class="input-container">
-    <input id="input-todo" type="text" placeholder="Enter a new task..." />
-    <button id="add-todo">+</button>
-  </div>
+  <h1>🗓️ Priority Scheduler</h1>
+
+  <!-- ── Add Task Form ───────────────────────────────────────-->
+  <form id="task-form" class="input-container">
+    <input id="input-desc" type="text" placeholder="Task description" required />
+
+    <input id="input-date" type="date" required />
+    <input id="input-time" type="time" required />
+
+    <select id="input-priority">
+      <option value="high">High</option>
+      <option value="medium" selected>Medium</option>
+      <option value="low">Low</option>
+    </select>
+
+    <button type="submit" id="add-btn">Add</button>
+  </form>
+
+  <!-- Task list -->
   <div class="container"></div>
 
   <script>
-    const inputTodo = document.getElementById("input-todo");
-    const addTodo = document.getElementById("add-todo");
-    const todoContainer = document.querySelector(".container");
+    /* -------------------- Config -------------------- */
     const API_URL = "http://localhost:4000/todos";
 
-    window.onload = async () => {
-      const todos = await fetchTodos();
-      todos.forEach(displayTodo);
+    /* -------------------- Elements ------------------ */
+    const form = document.getElementById("task-form");
+    const descInput = document.getElementById("input-desc");
+    const dateInput = document.getElementById("input-date");
+    const timeInput = document.getElementById("input-time");
+    const priorityInput = document.getElementById("input-priority");
+    const container = document.querySelector(".container");
+
+    /* -------------- Helper: sort tasks -------------- */
+    const priorityRank = { high: 1, medium: 2, low: 3 };
+    const sortTasks = (a, b) => {
+      const dateA = new Date(a.dueDate);
+      const dateB = new Date(b.dueDate);
+      if (dateA - dateB !== 0) return dateA - dateB; // earliest first
+      return priorityRank[a.priority] - priorityRank[b.priority];
     };
 
-    async function fetchTodos() {
+    /* ----------------- Initial Load ----------------- */
+    window.onload = async () => {
+      const tasks = await fetchTasks();
+      renderTasks(tasks);
+    };
+
+    async function fetchTasks() {
       const res = await fetch(API_URL);
       return res.json();
     }
 
-    addTodo.addEventListener("click", async () => {
-      const desc = inputTodo.value.trim();
-      if (desc !== "") {
-        const newTodo = await addTodoToServer(desc);
-        displayTodo(newTodo);
-        inputTodo.value = "";
-      }
+    /* ---------------- Add New Task ------------------ */
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const newTask = {
+        desc: descInput.value.trim(),
+        dueDate: `${dateInput.value}T${timeInput.value}:00`,
+        priority: priorityInput.value,
+        completed: false,
+      };
+      const savedTask = await createTask(newTask);
+      renderTasks(await fetchTasks());
+      form.reset();
     });
 
-    function displayTodo(todo) {
-      const todoEl = document.createElement("div");
-      todoEl.classList.add("todo");
-      if (todo.completed) todoEl.classList.add("completed");
-
-      const todoText = document.createElement("p");
-      todoText.innerText = todo.desc;
-
-      const todoActions = document.createElement("div");
-      todoActions.classList.add("actions");
-
-      const checkbox = document.createElement("input");
-      checkbox.setAttribute("type", "checkbox");
-      checkbox.checked = todo.completed;
-      checkbox.addEventListener("change", async () => {
-        todo.completed = checkbox.checked;
-        await updateTodo(todo);
-        todoEl.classList.toggle("completed", todo.completed);
-      });
-
-      const delBtn = document.createElement("button");
-      delBtn.innerText = "Delete";
-      delBtn.addEventListener("click", async () => {
-        await deleteTodo(todo.id);
-        todoContainer.removeChild(todoEl);
-      });
-
-      todoActions.appendChild(checkbox);
-      todoActions.appendChild(delBtn);
-
-      todoEl.appendChild(todoText);
-      todoEl.appendChild(todoActions);
-
-      todoContainer.appendChild(todoEl);
-    }
-
-    async function addTodoToServer(desc) {
+    async function createTask(task) {
       const res = await fetch(API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ desc, completed: false }),
+        body: JSON.stringify(task),
       });
       const data = await res.json();
       return data[data.length - 1];
     }
 
-    async function updateTodo(todo) {
-      await fetch(`${API_URL}/${todo.id}`, {
+    /* ---------------- Update Task ------------------- */
+    async function toggleComplete(task) {
+      task.completed = !task.completed;
+      await fetch(`${API_URL}/${task.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(todo),
+        body: JSON.stringify(task),
       });
     }
 
-    async function deleteTodo(id) {
-      await fetch(`${API_URL}/${id}`, {
-        method: "DELETE",
+    async function deleteTask(id) {
+      await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+    }
+
+    /* ---------------- Render List ------------------- */
+    function renderTasks(tasks) {
+      container.innerHTML = "";
+      tasks.sort(sortTasks).forEach(displayTask);
+    }
+
+    function displayTask(task) {
+      const taskEl = document.createElement("div");
+      taskEl.classList.add("todo");
+      if (task.completed) taskEl.classList.add("completed");
+
+      const left = document.createElement("div");
+      left.classList.add("left");
+      const title = document.createElement("p");
+      title.textContent = task.desc;
+      const meta = document.createElement("span");
+      const dateStr = new Date(task.dueDate).toLocaleString();
+      meta.textContent = `${dateStr} • ${task.priority.toUpperCase()}`;
+      meta.classList.add("meta");
+      left.appendChild(title);
+      left.appendChild(meta);
+
+      const actions = document.createElement("div");
+      actions.classList.add("actions");
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.checked = task.completed;
+      checkbox.addEventListener("change", async () => {
+        await toggleComplete(task);
+        renderTasks(await fetchTasks());
       });
+
+      const delBtn = document.createElement("button");
+      delBtn.textContent = "Delete";
+      delBtn.addEventListener("click", async () => {
+        await deleteTask(task.id);
+        renderTasks(await fetchTasks());
+      });
+
+      actions.appendChild(checkbox);
+      actions.appendChild(delBtn);
+
+      taskEl.appendChild(left);
+      taskEl.appendChild(actions);
+      container.appendChild(taskEl);
     }
   </script>
 </body>

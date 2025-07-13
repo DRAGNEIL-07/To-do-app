@@ -33,7 +33,8 @@ Frontend:
 
 📦 How to Use
 
-1.Clone the repository or download the ZIP.
+1.Clone the repository or download the ZIP.\
+
 2.Open index.html in your browser to run the quiz.
 
 ---
